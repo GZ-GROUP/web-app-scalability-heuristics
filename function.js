@@ -217,3 +217,62 @@ document.querySelectorAll('.nav-item, .nav-btn').forEach(el => {
     // Default: show home
     showView('home', null);
 })();
+
+// =============================================
+// LOGO → HOME NAVIGATION
+// =============================================
+const logoHome = document.getElementById('logo-home');
+if (logoHome) {
+    logoHome.addEventListener('click', e => {
+        e.preventDefault();
+        showView('home', null);
+        animateBars(document.getElementById('view-home'));
+    });
+}
+
+// =============================================
+// LANGUAGE TOGGLE (EN default / ES) — real translations, no machine translation
+// =============================================
+(function initLanguageToggle() {
+    const I18N = window.I18N || {};
+    const STORAGE_KEY = 'site_lang';
+    let currentLang = localStorage.getItem(STORAGE_KEY) || 'en';
+
+    function applyLanguage(lang) {
+        currentLang = lang;
+        document.documentElement.setAttribute('lang', lang);
+        document.body.classList.toggle('lang-es', lang === 'es');
+        document.body.classList.toggle('lang-en', lang === 'en');
+
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            const entry = I18N[key];
+            if (!entry) return;
+            const text = entry[lang] ?? entry.en ?? '';
+            if (el.hasAttribute('data-i18n-html')) {
+                el.innerHTML = text;
+            } else {
+                el.textContent = text;
+            }
+        });
+
+        document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+            const key = el.getAttribute('data-i18n-aria');
+            const entry = I18N[key];
+            if (!entry) return;
+            el.setAttribute('aria-label', entry[lang] ?? entry.en ?? '');
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        localStorage.setItem(STORAGE_KEY, lang);
+    }
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
+    });
+
+    applyLanguage(currentLang);
+})();
